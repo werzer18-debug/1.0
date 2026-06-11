@@ -5,7 +5,9 @@ channel** on demand. A user joins a "hub" channel, the bot instantly spins up a
 personal channel, drops them in, and hands them a full control panel. When the
 last person leaves, the channel cleans itself up.
 
-No paid APIs, no AI key — just the Discord Gateway and a tiny local SQLite file.
+No paid APIs, no AI key, no database server — just the Discord Gateway and a
+tiny local JSON file. Nothing to compile, so it runs anywhere (even on a phone
+via Termux).
 
 ## ✨ Features
 
@@ -90,7 +92,7 @@ Most actions are also one click away on the panel posted in each channel.
 ```
 src/
   index.js                 Entry point: client setup, startup reconciliation
-  database.js              SQLite schema + typed query helpers
+  database.js              JSON-file store + typed helpers (no native deps)
   deploy-commands.js       Registers slash commands with Discord
   commands/                Slash commands (/hub, /voice)
   handlers/
