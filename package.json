@@ -1,0 +1,21 @@
+{
+  "name": "tempvoice-bot",
+  "version": "1.0.0",
+  "description": "A Discord bot that creates temporary, user-owned voice channels on demand (Join-to-Create) with a full interactive control panel.",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "deploy": "node src/deploy-commands.js",
+    "dev": "node --watch src/index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.3.0",
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5"
+  },
+  "license": "MIT"
+}
