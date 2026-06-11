@@ -1,6 +1,5 @@
 import 'dotenv/config';
-import { REST, Routes } from 'discord.js';
-import { commands } from './commands/index.js';
+import { registerCommands } from './register.js';
 
 const { DISCORD_TOKEN, CLIENT_ID, GUILD_ID } = process.env;
 
@@ -9,16 +8,12 @@ if (!DISCORD_TOKEN || !CLIENT_ID) {
   process.exit(1);
 }
 
-const body = commands.map((c) => c.data.toJSON());
-const rest = new REST().setToken(DISCORD_TOKEN);
-
 try {
+  const count = await registerCommands(DISCORD_TOKEN, CLIENT_ID, GUILD_ID || undefined);
   if (GUILD_ID) {
-    await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), { body });
-    console.log(`Deployed ${body.length} commands to guild ${GUILD_ID}.`);
+    console.log(`Deployed ${count} commands to guild ${GUILD_ID}.`);
   } else {
-    await rest.put(Routes.applicationCommands(CLIENT_ID), { body });
-    console.log(`Deployed ${body.length} global commands (may take up to an hour to appear).`);
+    console.log(`Deployed ${count} global commands (may take up to an hour to appear).`);
   }
 } catch (err) {
   console.error('Failed to deploy commands:', err);

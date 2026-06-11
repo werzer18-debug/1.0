@@ -3,10 +3,11 @@ import { Client, Collection, Events, GatewayIntentBits } from 'discord.js';
 import { temps } from './database.js';
 import { commands } from './commands/index.js';
 import { deleteTempChannel } from './services/voiceManager.js';
+import { registerCommands } from './register.js';
 import voiceStateUpdate from './handlers/voiceStateUpdate.js';
 import interactionCreate from './handlers/interactionCreate.js';
 
-const { DISCORD_TOKEN } = process.env;
+const { DISCORD_TOKEN, CLIENT_ID, GUILD_ID, REGISTER_COMMANDS } = process.env;
 if (!DISCORD_TOKEN) {
   console.error('DISCORD_TOKEN must be set in .env');
   process.exit(1);
@@ -23,6 +24,19 @@ for (const command of commands) {
 
 client.once(Events.ClientReady, async (c) => {
   console.log(`Logged in as ${c.user.tag}`);
+
+  // Auto-register slash commands on startup unless disabled. This means a host
+  // only needs to run the bot — no separate deploy step. Set
+  // REGISTER_COMMANDS=false to skip (e.g. if you deploy commands manually).
+  if (REGISTER_COMMANDS !== 'false') {
+    try {
+      const count = await registerCommands(DISCORD_TOKEN, CLIENT_ID || c.user.id, GUILD_ID || undefined);
+      console.log(`Registered ${count} slash command(s)${GUILD_ID ? ` to guild ${GUILD_ID}` : ' globally'}.`);
+    } catch (err) {
+      console.error('Could not register slash commands:', err);
+    }
+  }
+
   await reconcileTempChannels(c);
 });
 
