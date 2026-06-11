@@ -3,8 +3,6 @@ import { temps } from '../database.js';
 import * as actions from '../services/actions.js';
 import { buildPanelEmbed, buildPanelComponents } from '../ui/panel.js';
 
-const ephemeral = (content) => ({ content, flags: MessageFlags.Ephemeral });
-
 export const data = new SlashCommandBuilder()
   .setName('voice')
   .setDescription('Control your temporary voice channel.')
@@ -57,13 +55,16 @@ export const data = new SlashCommandBuilder()
   );
 
 export async function execute(interaction) {
+  // Defer immediately so channel edits never hit the 3-second timeout.
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
   const channel = interaction.member?.voice?.channel;
   if (!channel) {
-    return interaction.reply(ephemeral('You need to be in your temporary voice channel to use this.'));
+    return interaction.editReply('You need to be in your temporary voice channel to use this.');
   }
   const temp = temps.get(channel.id);
   if (!temp) {
-    return interaction.reply(ephemeral('Your current voice channel is not a temporary channel.'));
+    return interaction.editReply('Your current voice channel is not a temporary channel.');
   }
 
   const uid = interaction.user.id;
@@ -114,11 +115,11 @@ export async function execute(interaction) {
       default:
         result = 'Unknown subcommand.';
     }
-    await interaction.reply(ephemeral(result));
+    await interaction.editReply(result);
   } catch (err) {
     const message = err instanceof actions.ActionError ? err.message : 'Something went wrong.';
     if (!(err instanceof actions.ActionError)) console.error('/voice error:', err);
-    await interaction.reply(ephemeral(message));
+    await interaction.editReply(message);
   }
 }
 
@@ -129,5 +130,5 @@ async function repostPanel(interaction, channel, temp) {
     components: buildPanelComponents(temp),
   });
   temps.setPanelMessage(channel.id, message.id);
-  await interaction.reply(ephemeral('Posted a fresh control panel. 🎛️'));
+  await interaction.editReply('Posted a fresh control panel. 🎛️');
 }
