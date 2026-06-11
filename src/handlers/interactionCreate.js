@@ -157,11 +157,9 @@ async function handleSelect(interaction) {
 // --- Error reporting --------------------------------------------------------
 
 async function reportError(interaction, err) {
-  const message =
-    err instanceof actions.ActionError
-      ? err.message
-      : 'Something went wrong handling that action.';
-  if (!(err instanceof actions.ActionError)) console.error('Interaction error:', err);
+  const friendly = actions.describeError(err);
+  const message = friendly ?? 'Something went wrong handling that action.';
+  if (friendly === null) console.error('Interaction error:', err);
 
   try {
     if (interaction.deferred && !interaction.replied) {

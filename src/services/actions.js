@@ -129,4 +129,24 @@ export async function destroy(channel, temp, userId) {
   return 'Channel deleted.';
 }
 
+/**
+ * Turns an error into a user-facing message. Returns null for unexpected
+ * errors so the caller can log them and show a generic message.
+ */
+export function describeError(err) {
+  if (err instanceof ActionError) return err.message;
+  // Discord "Missing Permissions" — almost always Manage Roles for lock/hide.
+  if (err?.code === 50013) {
+    return (
+      "I'm missing a permission needed for that — most likely **Manage Roles**. " +
+      'Ask a server admin to give my role **Manage Roles** and **Move Members** ' +
+      '(Server Settings → Roles → my role), then try again.'
+    );
+  }
+  if (err?.code === 50001) {
+    return "I don't have access to that channel. Please check my role's permissions.";
+  }
+  return null;
+}
+
 export { ensureOwner, limits };

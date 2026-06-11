@@ -36,12 +36,14 @@ Use this OAuth2 URL (replace `CLIENT_ID`), granting the `bot` and
 `applications.commands` scopes:
 
 ```
-https://discord.com/oauth2/authorize?client_id=CLIENT_ID&permissions=17826832&scope=bot+applications.commands
+https://discord.com/oauth2/authorize?client_id=CLIENT_ID&permissions=286262288&scope=bot+applications.commands
 ```
 
-The permission integer covers: **Manage Channels**, **Move Members**,
-**View Channels**, and **Connect** — the minimum needed to create, move into,
-and clean up temporary channels.
+The permission integer covers: **Manage Channels**, **Manage Roles**,
+**Move Members**, **View Channels**, and **Connect**. *Manage Roles* is what
+lets the bot lock/hide channels and permit/kick users (those edit channel
+permission overwrites); without it those specific controls fail with "Missing
+Permissions" while rename/limit still work.
 
 ### 3. Configure & run
 

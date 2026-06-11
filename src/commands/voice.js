@@ -117,9 +117,9 @@ export async function execute(interaction) {
     }
     await interaction.editReply(result);
   } catch (err) {
-    const message = err instanceof actions.ActionError ? err.message : 'Something went wrong.';
-    if (!(err instanceof actions.ActionError)) console.error('/voice error:', err);
-    await interaction.editReply(message);
+    const friendly = actions.describeError(err);
+    if (friendly === null) console.error('/voice error:', err);
+    await interaction.editReply(friendly ?? 'Something went wrong.');
   }
 }
 
