@@ -100,6 +100,9 @@ export async function createTempChannel(member, hub) {
 
 /**
  * Deletes a temporary channel and forgets it, remembering the owner's setup.
+ * If the Discord delete fails (e.g. missing permissions), the channel is kept
+ * in the database so the periodic sweep will retry it — this prevents the
+ * "forgotten orphan that never gets cleaned up" situation.
  */
 export async function deleteTempChannel(channel, temp) {
   if (temp) {
@@ -112,12 +115,26 @@ export async function deleteTempChannel(channel, temp) {
       locked: temp.locked,
       hidden: temp.hidden,
     });
-    temps.remove(temp.channel_id);
   }
-  await channel?.delete().catch((err) => {
-    // Surface this — a silent failure here is exactly what makes channels pile up.
-    console.error(`Could not delete channel ${channel?.id}: ${err?.message}`);
-  });
+
+  let deleted = true;
+  if (channel) {
+    try {
+      await channel.delete();
+    } catch (err) {
+      if (err?.code === 10003) {
+        // Unknown Channel — it's already gone, treat as success.
+      } else {
+        deleted = false;
+        console.error(
+          `Could not delete channel ${channel.id}: ${err?.message}. ` +
+            'Do I have the "Manage Channels" permission, and is my role high enough?'
+        );
+      }
+    }
+  }
+
+  if (temp && deleted) temps.remove(temp.channel_id);
 }
 
 export function clampBitrate(value, guild) {
