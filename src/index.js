@@ -37,17 +37,26 @@ client.once(Events.ClientReady, async (c) => {
     }
   }
 
-  await reconcileTempChannels(c);
+  await sweepEmptyChannels(c);
+  // Safety net: even if a "user left" voice event is missed (common on flaky
+  // connections), this guarantees empty temp channels are cleaned up and never
+  // pile up.
+  setInterval(() => sweepEmptyChannels(c).catch((e) => console.error('Sweep failed:', e)), SWEEP_INTERVAL_MS);
 });
 
 client.on(Events.VoiceStateUpdate, voiceStateUpdate);
 client.on(Events.InteractionCreate, interactionCreate);
 
+const SWEEP_INTERVAL_MS = 30_000;
+// Don't delete a freshly created channel before its owner has been moved in.
+const NEW_CHANNEL_GRACE_MS = 15_000;
+
 /**
- * On startup, reconcile the database against reality: delete channels that are
- * now empty (or gone), so a restart never leaves ghost channels behind.
+ * Deletes every tracked temporary channel that is currently empty (or already
+ * gone). Runs on startup and on a timer, so channels are reliably cleaned up
+ * even if the real-time voice event was dropped.
  */
-async function reconcileTempChannels(client) {
+async function sweepEmptyChannels(client) {
   let cleaned = 0;
   for (const temp of temps.listAll()) {
     const guild = client.guilds.cache.get(temp.guild_id);
@@ -56,12 +65,13 @@ async function reconcileTempChannels(client) {
       temps.remove(temp.channel_id);
       continue;
     }
+    if (Date.now() - (temp.created_at ?? 0) < NEW_CHANNEL_GRACE_MS) continue;
     if (channel.members.size === 0) {
       await deleteTempChannel(channel, temp);
       cleaned++;
     }
   }
-  if (cleaned) console.log(`Cleaned up ${cleaned} empty temporary channel(s) from a previous run.`);
+  if (cleaned) console.log(`Swept ${cleaned} empty temporary channel(s).`);
 }
 
 process.on('unhandledRejection', (err) => console.error('Unhandled rejection:', err));

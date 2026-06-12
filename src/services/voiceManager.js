@@ -114,7 +114,10 @@ export async function deleteTempChannel(channel, temp) {
     });
     temps.remove(temp.channel_id);
   }
-  await channel?.delete().catch(() => {});
+  await channel?.delete().catch((err) => {
+    // Surface this — a silent failure here is exactly what makes channels pile up.
+    console.error(`Could not delete channel ${channel?.id}: ${err?.message}`);
+  });
 }
 
 export function clampBitrate(value, guild) {
