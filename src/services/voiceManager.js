@@ -91,6 +91,9 @@ export async function createTempChannel(member, hub) {
       components: buildPanelComponents(temp),
     });
     temps.setPanelMessage(channel.id, message.id);
+    // Pin it so it's always one tap away even after the chat scrolls.
+    // Needs Manage Messages; harmless if missing — /voice panel still works.
+    await message.pin().catch(() => {});
   } catch {
     // Posting the panel is best-effort; the channel still works without it.
   }

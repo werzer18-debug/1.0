@@ -36,14 +36,17 @@ Use this OAuth2 URL (replace `CLIENT_ID`), granting the `bot` and
 `applications.commands` scopes:
 
 ```
-https://discord.com/oauth2/authorize?client_id=CLIENT_ID&permissions=286262288&scope=bot+applications.commands
+https://discord.com/oauth2/authorize?client_id=CLIENT_ID&permissions=286270480&scope=bot+applications.commands
 ```
 
 The permission integer covers: **Manage Channels**, **Manage Roles**,
-**Move Members**, **View Channels**, and **Connect**. *Manage Roles* is what
-lets the bot lock/hide channels and permit/kick users (those edit channel
-permission overwrites); without it those specific controls fail with "Missing
-Permissions" while rename/limit still work.
+**Move Members**, **Manage Messages**, **View Channels**, and **Connect**.
+- *Manage Roles* lets the bot lock/hide channels and permit/kick users (those
+  edit channel permission overwrites); without it those controls fail with
+  "Missing Permissions" while rename/limit still work.
+- *Manage Messages* lets it pin the control panel so it's always easy to find;
+  without it the panel just isn't pinned (you can still resummon it with
+  `/voice panel`).
 
 ### 3. Configure & run
 

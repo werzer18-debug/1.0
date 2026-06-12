@@ -130,5 +130,6 @@ async function repostPanel(interaction, channel, temp) {
     components: buildPanelComponents(temp),
   });
   temps.setPanelMessage(channel.id, message.id);
-  await interaction.editReply('Posted a fresh control panel. 🎛️');
+  await message.pin().catch(() => {});
+  await interaction.editReply('Posted a fresh control panel. 🎛️ (also pinned it)');
 }

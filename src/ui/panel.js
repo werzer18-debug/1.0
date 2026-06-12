@@ -38,7 +38,9 @@ export function buildPanelEmbed(channel, temp, ownerTag) {
       { name: 'Status', value: temp.locked ? '🔒 Locked' : '🔓 Unlocked', inline: true },
       { name: 'Visibility', value: temp.hidden ? '🙈 Hidden' : '👁️ Visible', inline: true }
     )
-    .setFooter({ text: 'This channel and panel vanish when everyone leaves.' });
+    .setFooter({
+      text: 'Lost this panel? Type /voice panel to bring it back. It vanishes when everyone leaves.',
+    });
 }
 
 /**
