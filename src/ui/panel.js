@@ -2,8 +2,8 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  EmbedBuilder,
 } from 'discord.js';
+import { brandEmbed, COLORS, E } from './brand.js';
 
 // Every button id is prefixed so the interaction handler can route them.
 export const PANEL_PREFIX = 'tv';
@@ -24,24 +24,39 @@ export const BUTTONS = {
 /**
  * Builds the control-panel embed shown inside a temporary channel's chat.
  */
-export function buildPanelEmbed(channel, temp, ownerTag) {
-  return new EmbedBuilder()
-    .setColor(temp.locked ? 0xed4245 : 0x5865f2)
-    .setTitle('🎛️ Voice Channel Controls')
+export function buildPanelEmbed(channel, temp) {
+  const client = channel.client;
+  const icon = client?.user?.displayAvatarURL?.();
+
+  return brandEmbed(client)
+    .setColor(temp.locked ? COLORS.danger : COLORS.brand)
+    .setAuthor(
+      icon
+        ? { name: `${BRAND_TITLE}`, iconURL: icon }
+        : { name: `${BRAND_TITLE}` }
+    )
     .setDescription(
-      `Owner: <@${temp.owner_id}>\n` +
-        'Use the buttons below to manage this channel. ' +
-        'Only the owner can use most controls.'
+      `Manage **<#${channel.id}>** with the buttons below.\n` +
+        `Most controls are owner-only — tap ${E.claim} **Claim** if the owner left.`
     )
     .addFields(
-      { name: 'Channel', value: `<#${channel.id}>`, inline: true },
-      { name: 'Status', value: temp.locked ? '🔒 Locked' : '🔓 Unlocked', inline: true },
-      { name: 'Visibility', value: temp.hidden ? '🙈 Hidden' : '👁️ Visible', inline: true }
+      { name: 'Owner', value: `<@${temp.owner_id}>`, inline: true },
+      { name: 'Lock', value: temp.locked ? `${E.lock} Locked` : `${E.unlock} Open`, inline: true },
+      {
+        name: 'Visibility',
+        value: temp.hidden ? `${E.hide} Hidden` : `${E.show} Visible`,
+        inline: true,
+      }
     )
-    .setFooter({
-      text: 'Lost this panel? Type /voice panel to bring it back. It vanishes when everyone leaves.',
-    });
+    .setFooter(
+      icon
+        ? { text: `${BRAND_FOOTER}`, iconURL: icon }
+        : { text: `${BRAND_FOOTER}` }
+    );
 }
+
+const BRAND_TITLE = `${E.panel} Voice Channel Controls`;
+const BRAND_FOOTER = `TempVoice ${E.dot} Lost this panel? Use /voice panel`;
 
 /**
  * Builds the rows of control buttons. Lock/Hide labels reflect current state.

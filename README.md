@@ -67,6 +67,12 @@ Anyone who joins that channel now gets their own temporary voice channel.
 
 ## 🎛️ Commands
 
+### General
+| Command | Description |
+| --- | --- |
+| `/help` | Overview of the bot and every command. |
+| `/about` | Live stats: servers, active channels, uptime, ping. |
+
 ### Admin — `/hub`
 | Command | Description |
 | --- | --- |

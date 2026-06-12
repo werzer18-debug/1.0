@@ -6,6 +6,7 @@ import {
 } from 'discord.js';
 import { hubs } from '../database.js';
 import { clampBitrate } from '../services/voiceManager.js';
+import { brandEmbed, E } from '../ui/brand.js';
 
 const ephemeral = (content) => ({ content, flags: MessageFlags.Ephemeral });
 
@@ -109,10 +110,17 @@ async function list(interaction) {
   if (all.length === 0) {
     return interaction.reply(ephemeral('No hubs configured yet. Use `/hub add` to create one.'));
   }
-  const lines = all.map(
-    (h) =>
-      `• <#${h.channel_id}> — name: \`${h.name_template}\`, ` +
-      `limit: ${h.user_limit || '∞'}, bitrate: ${Math.round(h.bitrate / 1000)} kbps`
-  );
-  await interaction.reply(ephemeral(`**Hubs in this server:**\n${lines.join('\n')}`));
+  const embed = brandEmbed(interaction.client)
+    .setTitle(`${E.gear} Join-to-Create Hubs`)
+    .setDescription(
+      all
+        .map(
+          (h) =>
+            `${E.voice} <#${h.channel_id}>\n` +
+            `${E.dot} name: \`${h.name_template}\` ${E.dot} ` +
+            `limit: \`${h.user_limit || '∞'}\` ${E.dot} bitrate: \`${Math.round(h.bitrate / 1000)} kbps\``
+        )
+        .join('\n\n')
+    );
+  await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 }

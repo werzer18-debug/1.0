@@ -124,9 +124,8 @@ export async function execute(interaction) {
 }
 
 async function repostPanel(interaction, channel, temp) {
-  const owner = await channel.guild.members.fetch(temp.owner_id).catch(() => null);
   const message = await channel.send({
-    embeds: [buildPanelEmbed(channel, temp, owner?.displayName ?? 'Unknown')],
+    embeds: [buildPanelEmbed(channel, temp)],
     components: buildPanelComponents(temp),
   });
   temps.setPanelMessage(channel.id, message.id);

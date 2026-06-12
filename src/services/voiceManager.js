@@ -86,8 +86,8 @@ export async function createTempChannel(member, hub) {
   // Post the control panel into the channel's built-in text chat.
   try {
     const message = await channel.send({
-      content: `<@${member.id}> here are your controls:`,
-      embeds: [buildPanelEmbed(channel, temp, member.displayName)],
+      content: `🎙️ <@${member.id}> welcome to your channel! Manage it with the panel below.`,
+      embeds: [buildPanelEmbed(channel, temp)],
       components: buildPanelComponents(temp),
     });
     temps.setPanelMessage(channel.id, message.id);
@@ -154,10 +154,8 @@ export function isHub(channelId) {
  * `existingMessage` may be supplied (e.g. from a button interaction) to avoid a fetch.
  */
 export async function refreshPanel(channel, temp, existingMessage = null) {
-  const ownerMember = await channel.guild.members.fetch(temp.owner_id).catch(() => null);
-  const ownerTag = ownerMember?.displayName ?? 'Unknown';
   const payload = {
-    embeds: [buildPanelEmbed(channel, temp, ownerTag)],
+    embeds: [buildPanelEmbed(channel, temp)],
     components: buildPanelComponents(temp),
   };
 

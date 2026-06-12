@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { Client, Collection, Events, GatewayIntentBits } from 'discord.js';
+import { ActivityType, Client, Collection, Events, GatewayIntentBits } from 'discord.js';
 import { temps } from './database.js';
 import { commands } from './commands/index.js';
 import { deleteTempChannel } from './services/voiceManager.js';
@@ -37,12 +37,28 @@ client.once(Events.ClientReady, async (c) => {
     }
   }
 
+  updatePresence(c);
   await sweepEmptyChannels(c);
   // Safety net: even if a "user left" voice event is missed (common on flaky
   // connections), this guarantees empty temp channels are cleaned up and never
-  // pile up.
-  setInterval(() => sweepEmptyChannels(c).catch((e) => console.error('Sweep failed:', e)), SWEEP_INTERVAL_MS);
+  // pile up. Also refresh the presence so it shows the live channel count.
+  setInterval(() => {
+    sweepEmptyChannels(c).catch((e) => console.error('Sweep failed:', e));
+    updatePresence(c);
+  }, SWEEP_INTERVAL_MS);
 });
+
+/**
+ * Sets the bot's status to show it's alive and how many channels it's running.
+ */
+function updatePresence(client) {
+  const count = temps.listAll().length;
+  const label = `${count} voice channel${count === 1 ? '' : 's'} • /help`;
+  client.user.setPresence({
+    status: 'online',
+    activities: [{ name: label, type: ActivityType.Watching }],
+  });
+}
 
 client.on(Events.VoiceStateUpdate, voiceStateUpdate);
 client.on(Events.InteractionCreate, interactionCreate);
